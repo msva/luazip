@@ -12,7 +12,7 @@ if string.find (_VERSION, "Lua 5.0") and not package then
 	package.cpath = os.getenv("LUA_CPATH") or "./?.so;./?.dll;./?.dylib"
 end
 
-require('zip')
+local zip = require('zip')
 
 function test_open ()
 	local zfile, err = zip.open('luazip.zip')
