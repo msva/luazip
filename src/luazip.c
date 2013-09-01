@@ -23,6 +23,11 @@
 	lua_pushstring(L, "" s, (sizeof(s)/sizeof(char))-1)
 #endif
 
+#if !defined LUA_VERSION_NUM
+/* Lua 5.0 */
+#define luaL_Reg luaL_reg
+#endif
+
 #if !defined LUA_VERSION_NUM || LUA_VERSION_NUM==501
 /*
 ** Adapted from Lua 5.2.0
@@ -507,7 +512,7 @@ static int ff_seek (lua_State *L) {
   }
 }
 
-static const luaL_reg ziplib[] = {
+static const luaL_Reg ziplib[] = {
   {"open", zip_open},
   {"close", zip_close},
   {"type", zip_type},
@@ -516,7 +521,7 @@ static const luaL_reg ziplib[] = {
   {NULL, NULL}
 };
 
-static const luaL_reg flib[] = {
+static const luaL_Reg flib[] = {
   {"open", f_open},
   {"close", zip_close},
   {"files", f_files},
@@ -525,7 +530,7 @@ static const luaL_reg flib[] = {
   {NULL, NULL}
 };
 
-static const luaL_reg fflib[] = {
+static const luaL_Reg fflib[] = {
   {"read", ff_read},
   {"close", ff_close},
   {"seek", ff_seek},
