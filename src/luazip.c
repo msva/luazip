@@ -23,10 +23,35 @@
 	lua_pushstring(L, "" s, (sizeof(s)/sizeof(char))-1)
 #endif
 
-#if !defined LUA_VERSION_NUM
+#if !defined(LUA_VERSION_NUM)
+/* Lua 5.0 */
+#define lua_rawlen luaL_getn
+#else
+#if LUA_VERSION_NUM==501
+/* Lua 5.1 */
+#define lua_rawlen lua_objlen
+#endif
+#endif
+
+#if !defined(LUA_VERSION_NUM)
 /* Lua 5.0 */
 #define luaL_Reg luaL_reg
+/*
+** Adapted from Lua 5.2.0
+*/
+LUALIB_API int luaL_newmetatable (lua_State *L, const char *tname) {
+	luaL_getmetatable(L, tname);  /* try to get metatable */
+	if (!lua_isnil(L, -1))  /* name already in use? */
+		return 0;  /* leave previous value on top, but return 0 */
+	lua_pop(L, 1);
+	lua_newtable(L);  /* create metatable */
+	lua_pushstring(L, tname);
+	lua_pushvalue(L, -1);
+	lua_settable(L, LUA_REGISTRYINDEX);
+	return 1;
+}
 #endif
+
 
 #if !defined LUA_VERSION_NUM || LUA_VERSION_NUM==501
 /*
@@ -44,23 +69,6 @@ void luaL_setfuncs (lua_State *L, const luaL_Reg *l, int nup) {
 		lua_settable(L, -(nup + 3));
 	}
 	lua_pop(L, nup);	/* remove upvalues */
-}
-#endif
-
-#if !defined(LUA_VERSION_NUM)
-/*
-** Adapted from Lua 5.2.0
-*/
-LUALIB_API int luaL_newmetatable (lua_State *L, const char *tname) {
-	luaL_getmetatable(L, tname);  /* try to get metatable */
-	if (!lua_isnil(L, -1))  /* name already in use? */
-		return 0;  /* leave previous value on top, but return 0 */
-	lua_pop(L, 1);
-	lua_newtable(L);  /* create metatable */
-	lua_pushstring(L, tname);
-	lua_pushvalue(L, -1);
-	lua_settable(L, LUA_REGISTRYINDEX);
-	return 1;
 }
 #endif
 
@@ -197,10 +205,10 @@ static int zip_openfile (lua_State *L) {
   
   if (lua_istable(L, 2))
   {
-    int i, m, n;
+    unsigned i, m, n;
 
     /* how many extension were specified? */
-    n = luaL_getn(L, 2);
+    n = lua_rawlen(L, 2);
 
     if (n > LUAZIP_MAX_EXTENSIONS)
     {
