@@ -23,14 +23,9 @@
 	lua_pushstring(L, "" s, (sizeof(s)/sizeof(char))-1)
 #endif
 
-#if !defined(LUA_VERSION_NUM)
-/* Lua 5.0 */
-#define lua_rawlen luaL_getn
-#else
 #if LUA_VERSION_NUM==501
 /* Lua 5.1 */
 #define lua_rawlen lua_objlen
-#endif
 #endif
 
 #if !defined(LUA_VERSION_NUM)
@@ -208,7 +203,11 @@ static int zip_openfile (lua_State *L) {
     unsigned i, m, n;
 
     /* how many extension were specified? */
+#if !defined(LUA_VERSION_NUM)
+    n = luaL_getn(L, 2);
+#else
     n = lua_rawlen(L, 2);
+#endif
 
     if (n > LUAZIP_MAX_EXTENSIONS)
     {
@@ -395,7 +394,12 @@ static int read_line (lua_State *L, ZZIP_FILE *f) {
     char *p = luaL_prepbuffer(&b);
     if (zzip_fgets(p, LUAL_BUFFERSIZE, f) == NULL) {  /* eof? */
       luaL_pushresult(&b);  /* close buffer */
+#if !defined(LUA_VERSION_NUM)
+/* Lua 5.0 */
       return (lua_strlen(L, -1) > 0);  /* check whether read something */
+#else
+      return (lua_rawlen(L, -1) > 0);  /* check whether read something */
+#endif
     }
     l = strlen(p);
     if (p[l-1] != '\n')
@@ -422,7 +426,12 @@ static int read_chars (lua_State *L, ZZIP_FILE *f, size_t n) {
     n -= nr;  /* still have to read `n' chars */
   } while (n > 0 && nr == rlen);  /* until end of count or eof */
   luaL_pushresult(&b);  /* close buffer */
+#if !defined(LUA_VERSION_NUM)
+/* Lua 5.0 */
   return (n == 0 || lua_strlen(L, -1) > 0);
+#else
+  return (n == 0 || lua_rawlen(L, -1) > 0);
+#endif
 }
 
 static int g_read (lua_State *L, ZZIP_FILE *f, int first) {
