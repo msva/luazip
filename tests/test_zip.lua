@@ -3,16 +3,14 @@ test_zip.lua
 test code for luazip
 --]]------------------------------------------------------------------------
 
+local zip
 -- compatibility code for Lua version 5.0 providing 5.1 behavior
 if string.find (_VERSION, "Lua 5.0") and not package then
-	if not LUA_PATH then
-		LUA_PATH = os.getenv("LUA_PATH") or "./?.lua;"
-	end
-	require"compat-5.1"
-	package.cpath = os.getenv("LUA_CPATH") or "./?.so;./?.dll;./?.dylib"
+	local cpath = os.getenv"LUA_CPATH" or "/usr/local/lib/lua/5.0/"
+	zip = loadlib(cpath.."zip.so", "luaopen_zip")()
+else
+	zip = require"zip"
 end
-
-local zip = require('zip')
 
 function test_open ()
 	local zfile, err = zip.open('luazip.zip')
