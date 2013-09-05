@@ -1,9 +1,9 @@
 package = "LuaZip"
 version = "1.3.0-1"
 source = {
-   url = "https://github.com/tomasguisasola/luazip/archive/v1_3_0.tar.gz",
-   md5 = "d7cc7c1ec02adb652bd9ddebb8e6c909",
-   dir = "luazip-1_3_0",
+   url = "https://github.com/tomasguisasola/luazip/archive/v1.3.0.tar.gz",
+   md5 = "8f2f46349d57e8caaf5d755a0ba4ca20",
+   dir = "luazip-1.3.0",
 }
 description = {
    summary = "Library for reading files inside zip files",
