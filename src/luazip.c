@@ -18,11 +18,6 @@
 #define ZIPINTERNALFILEHANDLE  "lzipInternalFile"
 #define LUAZIP_MAX_EXTENSIONS 32
 
-#if !defined(lua_pushliteral)
-#define lua_pushliteral(L, s) \
-	lua_pushstring(L, "" s, (sizeof(s)/sizeof(char))-1)
-#endif
-
 #if LUA_VERSION_NUM==501
 /* Lua 5.1 */
 #define lua_rawlen lua_objlen
@@ -31,20 +26,6 @@
 #if !defined(LUA_VERSION_NUM)
 /* Lua 5.0 */
 #define luaL_Reg luaL_reg
-/*
-** Adapted from Lua 5.2.0
-*/
-LUALIB_API int luaL_newmetatable (lua_State *L, const char *tname) {
-	luaL_getmetatable(L, tname);  /* try to get metatable */
-	if (!lua_isnil(L, -1))  /* name already in use? */
-		return 0;  /* leave previous value on top, but return 0 */
-	lua_pop(L, 1);
-	lua_newtable(L);  /* create metatable */
-	lua_pushstring(L, tname);
-	lua_pushvalue(L, -1);
-	lua_settable(L, LUA_REGISTRYINDEX);
-	return 1;
-}
 #endif
 
 
