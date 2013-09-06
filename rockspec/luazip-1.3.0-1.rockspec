@@ -24,13 +24,14 @@ external_dependencies = {
    }
 }
 build = {
-   type = "make",
-   build_variables = {
-      LIB_OPTION = "$(LIBFLAG) -L$(ZZIP_LIBDIR)",
-      CFLAGS = "$(CFLAGS) -I$(LUA_INCDIR) -I$(ZZIP_INCDIR)",
+   type = "builtin",
+   modules = {
+      zip = {
+         sources = { "src/luazip.c" },
+         libraries = { "zzip" },
+         incdirs = { "$(ZZIP_INCDIR)", "src/" },
+         libdirs = { "$(ZZIP_LIBDIR)" },
+      },
    },
-   install_variables = {
-      LUA_LIBDIR = "$(LIBDIR)",
-      LUA_DIR = "$(LUADIR)"
-   }
+   copy_directories = { "doc", "tests", },
 }
