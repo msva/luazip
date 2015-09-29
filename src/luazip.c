@@ -18,32 +18,35 @@
 #define ZIPINTERNALFILEHANDLE  "lzipInternalFile"
 #define LUAZIP_MAX_EXTENSIONS 32
 
-#if LUA_VERSION_NUM==501
-/* Lua 5.1 */
-#define lua_rawlen lua_objlen
+#ifndef LUA_VERSION_NUM
+#define LUA_VERSION_NUM 500
 #endif
 
-#if !defined(LUA_VERSION_NUM)
-/* Lua 5.0 */
+#if LUA_VERSION_NUM < 501
 #define luaL_Reg luaL_reg
 #endif
 
+#if LUA_VERSION_NUM > 502
+#define luaL_optlong(l,n,d) luaL_optinteger(l,n,d)
+#endif
 
-#if !defined LUA_VERSION_NUM || LUA_VERSION_NUM==501
+#if LUA_VERSION_NUM < 502
+/* Lua 5.1 */
+#define lua_rawlen lua_objlen
+
 /*
-** Adapted from Lua 5.2.0
+** Adapted from Lua 5.3.0
 */
 static void luaL_setfuncs (lua_State *L, const luaL_Reg *l, int nup) {
-	luaL_checkstack(L, nup=1, "too many upvalues");
-	for (; l->name != NULL; l++) {	/* fill the table with given functions */
-		int i;
-		lua_pushstring(L, l->name);
-		for (i = 0; i < nup; i++)	/* copy upvalues to the top */
-			lua_pushvalue(L, -(nup + 1));
-		lua_pushcclosure(L, l->func, nup);	/* closure with those upvalues */
-		lua_settable(L, -(nup + 3));
-	}
-	lua_pop(L, nup);	/* remove upvalues */
+  luaL_checkstack(L, nup, "too many upvalues");
+  for (; l->name != NULL; l++) {  /* fill the table with given functions */
+    int i;
+    for (i = 0; i < nup; i++)  /* copy upvalues to the top */
+      lua_pushvalue(L, -nup);
+    lua_pushcclosure(L, l->func, nup);  /* closure with those upvalues */
+    lua_setfield(L, -(nup + 2), l->name);
+  }
+  lua_pop(L, nup);  /* remove upvalues */
 }
 #endif
 
@@ -183,7 +186,7 @@ static int zip_openfile (lua_State *L) {
     unsigned i, m, n;
 
     /* how many extension were specified? */
-#if !defined(LUA_VERSION_NUM)
+#if LUA_VERSION_NUM < 501
     n = luaL_getn(L, 2);
 #else
     n = lua_rawlen(L, 2);
@@ -374,8 +377,7 @@ static int read_line (lua_State *L, ZZIP_FILE *f) {
     char *p = luaL_prepbuffer(&b);
     if (zzip_fgets(p, LUAL_BUFFERSIZE, f) == NULL) {  /* eof? */
       luaL_pushresult(&b);  /* close buffer */
-#if !defined(LUA_VERSION_NUM)
-/* Lua 5.0 */
+#if LUA_VERSION_NUM < 501
       return (lua_strlen(L, -1) > 0);  /* check whether read something */
 #else
       return (lua_rawlen(L, -1) > 0);  /* check whether read something */
@@ -406,8 +408,7 @@ static int read_chars (lua_State *L, ZZIP_FILE *f, size_t n) {
     n -= nr;  /* still have to read `n' chars */
   } while (n > 0 && nr == rlen);  /* until end of count or eof */
   luaL_pushresult(&b);  /* close buffer */
-#if !defined(LUA_VERSION_NUM)
-/* Lua 5.0 */
+#if LUA_VERSION_NUM < 501
   return (n == 0 || lua_strlen(L, -1) > 0);
 #else
   return (n == 0 || lua_rawlen(L, -1) > 0);
@@ -494,7 +495,7 @@ static int ff_seek (lua_State *L) {
   static const char *const modenames[] = {"set", "cur", "end", NULL};
   ZZIP_FILE *f = tointernalfile(L, 1);
   long offset = luaL_optlong(L, 3, 0);
-#if ! defined (LUA_VERSION_NUM) || LUA_VERSION_NUM < 501
+#if LUA_VERSION_NUM < 501
   int op = luaL_findstring(luaL_optstring(L, 2, "cur"), modenames);
   luaL_argcheck(L, op != -1, 2, "invalid mode");
 #else
@@ -579,7 +580,7 @@ static int createmeta (lua_State *L) {
 }
 
 LUAZIP_API int luaopen_zip (lua_State *L) {
-	lua_pop(L, createmeta(L));
+	lua_pop(L,createmeta(L));
 	lua_newtable(L);
 	luaL_setfuncs(L, ziplib, 0);
   set_info(L);
