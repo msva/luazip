@@ -12,6 +12,7 @@
 #define luazip_h
 
 #include "lua.h"
+#include "lauxlib.h"
 
 #ifndef LUAZIP_API
 #define LUAZIP_API	LUA_API
@@ -19,5 +20,9 @@
 
 #define LUA_ZIPLIBNAME	"zip"
 LUAZIP_API int luaopen_zip (lua_State *L);
+
+#if LUA_VERSION_NUM < 502
+LUALIB_API void luaL_setfuncs (lua_State *L, const luaL_Reg *l, int nup);
+#endif
 
 #endif

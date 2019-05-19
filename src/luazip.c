@@ -12,7 +12,6 @@
 #include <stdlib.h>
 #include "zzip/zzip.h"
 #include "luazip.h"
-#include "lauxlib.h"
 
 #define ZIPFILEHANDLE    "lzipFile"
 #define ZIPINTERNALFILEHANDLE  "lzipInternalFile"
@@ -37,7 +36,7 @@
 /*
 ** Adapted from Lua 5.3.0
 */
-static void luaL_setfuncs (lua_State *L, const luaL_Reg *l, int nup) {
+LUALIB_API void luaL_setfuncs (lua_State *L, const luaL_Reg *l, int nup) {
   luaL_checkstack(L, nup, "too many upvalues");
   for (; l->name != NULL; l++) {  /* fill the table with given functions */
     int i;
